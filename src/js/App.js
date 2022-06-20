@@ -1,11 +1,19 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { Provider } from 'react-redux';
+
 import HomeView from './views/Home';
-import LoginView from './views/Login';
-import RegisterView from './views/Register';
+import ChatView from './views/Chat';
+import WelcomeView from './views/Welcome';
+// import RegisterView from './views/Register';
 import SettingsView from './views/Settings';
 // import { ipcRenderer } from 'electron';
 import Navbar from './components/Navbar';
+
+
+import configureStore from './store';
+import { listenToAuthChanges } from './actions/auth';
 
 import {
   HashRouter as Router,
@@ -13,34 +21,35 @@ import {
   Route
 } from 'react-router-dom';
 
-export default function App() {
-//   const title = "Hello World ";
-//   const enhancedTitle = title + ' - React App!';
-//   const sendNotification = () => {
-    // ipcRenderer.send('notify', 'This is my custom message!');
-    // window.sendNotification('My custom message');
-    // electron.notificationApi.sendNotification('My custom message!');
+const store = configureStore();
 
+export default function App() {
+
+  useEffect(() => {
+    store.dispatch(listenToAuthChanges());
+  }, [])
 
   return (
-    <Router>
-      <Navbar />
-      <div className='content-wrapper'>
-        <Switch>
-          <Route path="/" exact>
-            <HomeView />
-          </Route>
-          <Route path="/settings">
-            <SettingsView/>
-          </Route>
-          <Route path="/login">
-            <LoginView />
-          </Route>
-          <Route path="/register">
-            <RegisterView/>
-          </Route>
-        </Switch>
-      </div>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <Navbar />
+        <div className='content-wrapper'>
+          <Switch>
+            <Route path="/" exact>
+              <WelcomeView />
+            </Route>
+            <Route path="/home">
+              <HomeView />
+            </Route>
+            <Route path="/chat/:id">
+              <ChatView />
+            </Route>
+            <Route path="/settings">
+              <SettingsView />
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    </Provider>
   )
 }
